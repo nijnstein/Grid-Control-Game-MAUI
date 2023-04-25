@@ -61,6 +61,10 @@ namespace NSS.GameObjects
         {
         }
 
+        public virtual void PostRender(ICanvas canvas, Rect dirtyRect)
+        { 
+        }
+
         public PointF PointToView(float x, float y) => PointToView(new PointF(x, y)); 
 
         public PointF PointToView(PointF p) =>
@@ -128,6 +132,15 @@ namespace NSS.GameObjects
             foreach (GameObject go in Children)
             {
                 go.DoRender(canvas, dirtyRect);
+            }
+        }
+
+        public virtual void DoPostRender(ICanvas canvas, RectF dirtyRect)
+        {
+            PostRender(canvas, dirtyRect);
+            foreach (GameObject go in Children)
+            {
+                go.DoPostRender(canvas, dirtyRect);
             }
         }
 

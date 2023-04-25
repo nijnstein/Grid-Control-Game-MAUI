@@ -9,7 +9,7 @@ namespace Grid.GameObjects
     {
         public Player(GridGame game, Grid grid) : base(game, grid)
         {
-            Color = Colors.Green;
+            Color = Colors.LimeGreen;
         }
 
         public override void Update(float deltaTime)
@@ -49,6 +49,8 @@ namespace Grid.GameObjects
 
                         // gameover 
                         Game.GameState = GameState.GameOver;
+
+                        Game.ShakeFrameCountDown = 30;
                     }
                     else
                     {

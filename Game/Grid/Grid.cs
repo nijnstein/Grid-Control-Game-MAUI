@@ -349,7 +349,7 @@ namespace Grid.GameObjects
             if (surface == null)
             {
                 // if there is no surface then remove it from the point list.. -> should be error 
-                int i = Points.Count - CurrentPath.Count - 1;
+                int i = Points.Count - CurrentPath.Count + 1;
                 int c = CurrentPath.Count - 1;
                 Points.RemoveRange(i, c);
                 Connections.RemoveRange(i, c); 

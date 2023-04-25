@@ -35,6 +35,7 @@ namespace NSS.GameObjects
         public Color BorderColor = Colors.Gray;
         public float BorderStroke = 2f;
         public Color BackgroundColor = Color.FromRgb(10, 10, 10);
+        public bool FillBackground = true;
 
         public Game() : base(null) 
         {
@@ -77,6 +78,7 @@ namespace NSS.GameObjects
             }
 
             DoRender(canvas, dirtyRect);
+            DoPostRender(canvas, dirtyRect);
         }
 
         public override void Render(ICanvas canvas, RectF dirtyRect)
@@ -85,18 +87,20 @@ namespace NSS.GameObjects
             {
                 return; 
             }
-
-            PointF p = UnshakenPointToView(Position);
-            PointF e = UnshakenPointToView(Extent);
-
-            if (dirtyRect.IntersectsWith(new RectF(p.X, p.Y, e.X, e.Y)))
+            if (FillBackground)
             {
-                // background frame 
-                canvas.StrokeColor = BorderColor;
-                canvas.StrokeSize = BorderStroke;
-                canvas.FillColor = BackgroundColor;
-                canvas.FillRectangle(p.X - e.X, p.Y - e.Y, e.X * 2f, e.Y * 2f);
-                canvas.DrawRectangle(p.X - e.X, p.Y - e.Y, e.X * 2f, e.Y * 2f);
+                PointF p = UnshakenPointToView(Position);
+                PointF e = UnshakenPointToView(Extent);
+
+                if (dirtyRect.IntersectsWith(new RectF(p.X, p.Y, e.X, e.Y)))
+                {
+                    // background frame 
+                    canvas.StrokeColor = BorderColor;
+                    canvas.StrokeSize = BorderStroke;
+                    canvas.FillColor = BackgroundColor;
+                    canvas.FillRectangle(p.X - e.X, p.Y - e.Y, e.X * 2f, e.Y * 2f);
+                    canvas.DrawRectangle(p.X - e.X, p.Y - e.Y, e.X * 2f, e.Y * 2f);
+                }
             }
         }
 

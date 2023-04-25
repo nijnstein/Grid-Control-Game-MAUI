@@ -94,9 +94,16 @@ namespace NSS
         }
 
 
-        //See "The Point in Polygon Problem for Arbitrary Polygons" by Hormann & Agathos
-        //http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
-        //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
+        /// <summary>
+        /// See "The Point in Polygon Problem for Arbitrary Polygons" by Hormann & Agathos
+        /// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
+        /// returns 0 if false, +1 if true, -1 if pt ON polygon boundary
+        /// refactored clipper code to use floats and pointf 
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static int PointInPolygon(PointF[] points, PointF pt)
         {
 #if DEBUG
@@ -170,14 +177,6 @@ namespace NSS
             } 
             return result;
         }
-
-
-
-
-
-
-
-
 
 
         /// <summary>

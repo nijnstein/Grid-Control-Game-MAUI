@@ -1,5 +1,8 @@
-﻿using Microsoft.Maui.Animations;
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Animations;
+using Microsoft.Maui.Graphics;
 using NSS.GameObjects;
+using System.Net;
 using Font = Microsoft.Maui.Graphics.Font;
 
 namespace Grid.GameObjects
@@ -14,6 +17,14 @@ namespace Grid.GameObjects
         public Grid Grid; 
         public Player Player;
         public List<GridActor> Enemies;
+                                                    
+        public Color GridColor = Colors.LightGray; 
+        public Color GridShadow = Colors.Crimson;
+
+        public Color PathColor = Colors.Yellow; 
+
+        public Color BackgroundColor = Color.FromRgb(.07f, .04f, .07f);
+        public Color BackgroundGradientColor = Color.FromRgb(.17f, .14f, .17f);
 
         public int Score;
         public double TotalTime;
@@ -25,6 +36,7 @@ namespace Grid.GameObjects
                
         public GridGame()
         {
+            FillBackground = false; 
             GameState = GameState.Start;
             ResetIntoPlayState = false; 
         }
@@ -135,29 +147,48 @@ namespace Grid.GameObjects
 
         public override void Render(ICanvas canvas, RectF dirtyRect)
         {
-            if(ViewportWidth <= 0 || ViewportHeight <= 0 || Grid == null)
+            if (ViewportWidth <= 0 || ViewportHeight <= 0 || Grid == null)
             {
                 return;
             }
 
+            // fill background 
+            LinearGradientBrush brush = new LinearGradientBrush()
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(1, 1)
+            };
+            brush.GradientStops.Add(new GradientStop(BackgroundColor, 0));
+            brush.GradientStops.Add(new GradientStop(BackgroundGradientColor, 0.4f));
+            brush.GradientStops.Add(new GradientStop(BackgroundColor, 1f));
+
+            Rect rcView = new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
+            canvas.FillColor = BackgroundColor;
+            canvas.SetFillPaint(brush, rcView);
+            canvas.FillRectangle(rcView);
+
             // the border
             Color shakeColor = Game.ShakeFrameCountDown % 2 == 1 ? Colors.Red : Colors.WhiteSmoke;
             canvas.StrokeColor = shakeColor;
-            canvas.StrokeSize = this.ShakeFrameCountDown > 0 ? 9 : 3; 
+            canvas.StrokeSize = this.ShakeFrameCountDown > 0 ? 9 : 3;
             canvas.StrokeDashPattern = new float[] { 0.5f };
-            canvas.DrawRectangle(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom); 
-  
+
+            canvas.DrawRectangle(rcView);
+
             // the scaling from grid to the internal canvas (which is later transformed to viewspace) 
             float gx = (1f / (float)GridWidth) * CanvasWidth;
             float gy = (1f / (float)GridHeight) * CanvasHeight;
 
             // draw grid connections
-            canvas.StrokeColor = Colors.Gray;
+            canvas.StrokeColor = GridColor;
             canvas.StrokeLineJoin = LineJoin.Bevel;
             canvas.StrokeLineCap = LineCap.Butt;
             canvas.StrokeDashPattern = null;
             canvas.FillColor = Colors.White;
-            canvas.StrokeSize = 2; 
+            canvas.StrokeSize = 2;
+            canvas.SetShadow(new SizeF(0, 0), 0, GridShadow);
+
+            int pathLimit = Grid.CurrentPath.Count == 0 ? Grid.Connections.Count : Grid.Connections.Count - Grid.CurrentPath.Count;
             for (int i = 0; i < Grid.Connections.Count; i++)
             {
                 GridConnection connection = Grid.Connections[i];
@@ -167,28 +198,39 @@ namespace Grid.GameObjects
                 // draw only connections to the right and bottom preventing overdraw 
                 if (connection.Right >= 0)
                 {
-                    GridPoint b = Grid.Points[connection.Right]; 
+                    canvas.StrokeColor = (connection.Right >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
+                    GridPoint b = Grid.Points[connection.Right];
                     PointF p2 = new PointF(b.X * gx, b.Y * gy);
                     canvas.DrawLine(p1, PointToView(p2));
                 }
                 if (connection.Bottom >= 0)
                 {
+                    canvas.StrokeColor = (connection.Bottom >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
                     GridPoint b = Grid.Points[connection.Bottom];
                     PointF p2 = new PointF(b.X * gx, b.Y * gy);
                     canvas.DrawLine(p1, PointToView(p2));
                 }
 
                 // attenuate the connection point with a filled dot 
-                canvas.FillCircle(p1, DOT_SCALE * gx); 
+                canvas.FillCircle(p1, DOT_SCALE * gx);
             }
+
+        }
+
+        public override void PostRender(ICanvas canvas, Rect dirty)
+        { 
+            // this should draw in a seperate layer after all other stuff 
 
             // Paused header 
             switch (Game.GameState)
             {
                 case GameState.Play:
                     {
-                        canvas.FontColor = Colors.White;
+                        canvas.FontColor = Colors.Red;
+                        canvas.Font = Font.DefaultBold; 
                         canvas.FontSize = 20;
+                        canvas.SetShadow(new SizeF(0, 0), 0, Colors.Black);
+
                         canvas.DrawString($"SCORE: {Score}",
                             10 + ViewportMarginLeft, 
                             -10 + ViewportMarginTop + ViewportMarginBottom, 
@@ -209,37 +251,71 @@ namespace Grid.GameObjects
 
                 case GameState.Paused:
                     {
-                        canvas.FontColor = Colors.White;
-                        canvas.FontSize = 40;
-                        canvas.DrawString("PAUSE\n\n[esc] to continue\n[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
+                        DrawBackground(canvas);
+                        PrepareLargeText(canvas);
+
+                        canvas.DrawString("PAUSE", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
+
+                        PrepareSmallText(canvas);
+                        canvas.DrawString("[esc] to continue\n[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
                         break;
                     }
 
                 case GameState.GameOver:
                     {
-                        canvas.FontColor = Colors.White;
-                        canvas.FontSize = 40;
-                        canvas.DrawString("YOU SUCK\n\n[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
+                        DrawBackground(canvas);
+                        PrepareLargeText(canvas);
+
+                        canvas.DrawString("GAMEOVER", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
+
+                        PrepareSmallText(canvas);
+                        canvas.DrawString("[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
                         break;
                     }
 
                 case GameState.Start:
                     {
-                        canvas.FontColor = Colors.Green;
-                        canvas.FontSize = ViewportHeight / 10;
-                        canvas.SetShadow(new SizeF(6, 6), 4, Colors.Yellow);
-                        canvas.Font = Font.DefaultBold;
+                        PrepareLargeText(canvas);
 
                         canvas.DrawString("START", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
 
-                        canvas.FontColor = Colors.White;
-                        canvas.FontSize = 30;
-                        canvas.SetShadow(new SizeF(0, 0), 0, Colors.Gray);
-                        canvas.Font = Font.Default;
-
+                        PrepareSmallText(canvas);
                         canvas.DrawString("[space] to start\n[arrow-keys] to move\n[esc] to pause", 0, ViewportHeight / 2, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
                         break;
                     }
+            }
+
+            void DrawBackground(ICanvas canvas)
+            {
+                LinearGradientBrush brush = new LinearGradientBrush()
+                {
+                    StartPoint = new Point(0, 0),
+                    EndPoint = new Point(1, 1)
+                };
+                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.1f, .1f, .1f, .6f), 0));
+                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.2f, .2f, .2f, .6f), 0.4f));
+                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.1f, .1f, .1f, .6f), 1f));
+
+                Rect rcView = new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
+
+                canvas.SetFillPaint(brush, rcView);
+                canvas.FillRectangle(rcView); 
+            }
+
+            void PrepareLargeText(ICanvas canvas)
+            {
+                canvas.FontColor = Colors.Crimson;
+                canvas.FontSize = ViewportHeight / 10;
+                canvas.SetShadow(new SizeF(6, 6), 4, Colors.DarkRed);
+                canvas.Font = Font.DefaultBold;
+            }
+
+            static void PrepareSmallText(ICanvas canvas)
+            {
+                canvas.FontColor = Colors.White;
+                canvas.FontSize = 30;
+                canvas.SetShadow(new SizeF(1, 1), 1, Colors.Gray);
+                canvas.Font = Font.Default;
             }
         }
     }

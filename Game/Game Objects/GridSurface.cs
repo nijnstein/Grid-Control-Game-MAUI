@@ -42,7 +42,7 @@ namespace Grid.GameObjects
             HighlightColor = _highlightColors[idx];
          }
 
-        static Color _baseColor = Colors.Orange;
+        static Color _baseColor = Colors.Crimson;
         static Color[] _colors = new Color[]
         {
             _baseColor, _baseColor.Lerp(Colors.White, 0.4f), _baseColor.Lerp(Colors.Black, 0.2f), _baseColor.Lerp(Colors.White, 0.2f), _baseColor.Lerp(Colors.Black, 0.1f), _baseColor.Lerp(Colors.Red, 0.1f), _baseColor.Lerp(Colors.Black, 0.25f)
@@ -76,9 +76,11 @@ namespace Grid.GameObjects
             return path;
         }
 
-
         public override void Render(ICanvas canvas, RectF dirtyRect)
         {
+            //
+            // TODO:  should invalidate path if the game is resized 
+            //
             if (_path == null)
             {
                 _path = ToPathF(Offset);
@@ -87,8 +89,6 @@ namespace Grid.GameObjects
             if (_pattern == null || IsHighlighted)
             {
                 Color color = IsHighlighted ? HighlightColor : FillColor;
-
-                // Create a 10x10 template for the pattern
                 using (PictureCanvas picture = new PictureCanvas(0, 0, 10, 10))
                 {
                     picture.StrokeColor = color;

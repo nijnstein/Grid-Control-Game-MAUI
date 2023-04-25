@@ -8,7 +8,7 @@ namespace Grid.GameObjects
     {
         public Enemy(GridGame game, Grid grid) : base(game, grid)
         {
-            Color = Colors.Red;
+            Color = Colors.Yellow;
         }
 
         public override void Update(float deltaTime)
