@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Grid.MainPage"
+             xmlns:gameObjects="clr-namespace:Grid.GameObjects">
+
+    <ContentPage.Resources>
+        <gameObjects:GridGame x:Key="game" />
+    </ContentPage.Resources>
+    
+    
+        <GraphicsView x:Name="view"  
+                      Drawable="{StaticResource game}"
+                      HorizontalOptions="Fill" 
+                      VerticalOptions="Fill">              
+        </GraphicsView>
+    
+</ContentPage>
