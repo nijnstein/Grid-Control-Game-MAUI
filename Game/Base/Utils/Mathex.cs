@@ -1,5 +1,4 @@
-﻿using Kotlin;
-using Microsoft.Maui.Animations;
+﻿using Microsoft.Maui.Animations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,59 +93,81 @@ namespace NSS
             return newPoly.ToArray();
         }
 
+
         //See "The Point in Polygon Problem for Arbitrary Polygons" by Hormann & Agathos
         //http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
-        public static int PointInPolygon(IntPoint pt, OutPt op)
+        //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
+        public static int PointInPolygon(PointF[] points, PointF pt)
         {
-            //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
-            int result = 0;
-            OutPt startOp = op;
-            cInt ptx = pt.X, pty = pt.Y;
-            cInt poly0x = op.Pt.X, poly0y = op.Pt.Y;
-
-            do
+#if DEBUG
+            if(points == null || points.Length < 3 || points[0] != points[points.Length - 1])
             {
-                op = op.Next;
-                cInt poly1x = op.Pt.X, poly1y = op.Pt.Y;
+                throw new Exception("point list does not contain a valid closed polygon");
+            }
+#endif 
+
+            int result = 0;
+
+            float ptx = pt.X;
+            float pty = pt.Y;
+            float poly0x = points[0].X; 
+            float poly0y = points[0].Y;
+
+            for(int i = 1; i < points.Length; i++)
+            {
+                PointF op = points[i];
+
+                float poly1x = op.X;
+                float poly1y = op.Y;
 
                 if (poly1y == pty)
                 {
-                    if ((poly1x == ptx) || (poly0y == pty &&
-                      ((poly1x > ptx) == (poly0x < ptx))))
+                    if ((poly1x == ptx) || (poly0y == pty && ((poly1x > ptx) == (poly0x < ptx))))
+                    {
                         return -1;
+                    }
                 }
                 if ((poly0y < pty) != (poly1y < pty))
                 {
                     if (poly0x >= ptx)
                     {
                         if (poly1x > ptx)
+                        {
                             result = 1 - result;
+                        }
                         else
                         {
-                            double d = (double)(poly0x - ptx) * (poly1y - pty) -
-                              (double)(poly1x - ptx) * (poly0y - pty);
+                            float d = (float)(poly0x - ptx) * (poly1y - pty) - (float)(poly1x - ptx) * (poly0y - pty);
+
                             if (d == 0)
+                            {
                                 return -1;
+                            }
                             if ((d > 0) == (poly1y > poly0y))
+                            {
                                 result = 1 - result;
+                            }
                         }
                     }
                     else
                     {
                         if (poly1x > ptx)
                         {
-                            double d = (double)(poly0x - ptx) * (poly1y - pty) -
-                              (double)(poly1x - ptx) * (poly0y - pty);
+                            float d = (float)(poly0x - ptx) * (poly1y - pty) - (float)(poly1x - ptx) * (poly0y - pty);
                             if (d == 0)
+                            {
                                 return -1;
+                            }
                             if ((d > 0) == (poly1y > poly0y))
+                            {
                                 result = 1 - result;
+                            }
                         }
                     }
                 }
                 poly0x = poly1x;
                 poly0y = poly1y;
-            } while (startOp != op);
+            } 
             return result;
         }
 
