@@ -37,7 +37,7 @@ namespace Grid.GameObjects
 #if DEBUG
             throw new Exception("points may not be equal");
 #else
-            return GridConnectionType.Left; 
+            return Direction.Left; 
 #endif
         }
 
@@ -52,10 +52,10 @@ namespace Grid.GameObjects
             switch(connectionType)
             {
                 default: 
-                case Direction.Left: return a.X - b.X;
-                case Direction.Right: return b.X - a.X;
-                case Direction.Top: return a.Y - b.Y;
-                case Direction.Bottom: return b.Y - a.Y; 
+                case Direction.Left: 
+                case Direction.Right: return MathF.Abs(b.X - a.X);
+                case Direction.Top:
+                case Direction.Bottom: return MathF.Abs(b.Y - a.Y); 
             }
         }
     }
