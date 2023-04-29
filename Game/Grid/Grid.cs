@@ -65,7 +65,7 @@ namespace Grid.GameObjects
                 int current = CurrentPath[i];
                 PointF p2 = Points[current].AsPointF;
 
-                if (MathEx.TryGetSegmentIntersection(a, b, p1, p2, out intersection, true))
+                if (MathEx.TryIntersectLineSegments90(a, b, p1, p2, out intersection))
                 {
                     // segmentize i-c.Right 
                     h1 = prev;
@@ -120,7 +120,7 @@ namespace Grid.GameObjects
                 // - only check right/bottom direction as to avoid many duplicate checks 
                 if ((c.Right >= 0) & (c.Right < endIndex)
                     &&
-                    MathEx.TryGetSegmentIntersection(a, b, p, Points[c.Right].AsPointF, out PointF intersection, true))
+                    MathEx.TryIntersectLineSegments90(a, b, p, Points[c.Right].AsPointF, out PointF intersection))
                 {
                     // segmentize i-c.Right 
                     h1 = i;
@@ -132,7 +132,7 @@ namespace Grid.GameObjects
                 else
                 if ((c.Bottom >= 0) & (c.Bottom < endIndex)
                     &&
-                    MathEx.TryGetSegmentIntersection(a, b, p, Points[c.Bottom].AsPointF, out intersection, true))
+                    MathEx.TryIntersectLineSegments90(a, b, p, Points[c.Bottom].AsPointF, out intersection))
                 {
                     // segmentize i-c.Bottom 
                     h1 = i;

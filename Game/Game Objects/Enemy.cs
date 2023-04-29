@@ -19,7 +19,7 @@ namespace Grid.GameObjects
 
             if(IsOnPoint)
             {
-                moved = MoveTowardsPlayer(deltaTime); 
+                moved = MoveTowardsPlayer(deltaTime);
             }
             else
             if(IsOnSegment)

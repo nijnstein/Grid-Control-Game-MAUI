@@ -291,6 +291,42 @@ namespace NSS
         }
 
         /// <summary>
+        /// intersect lines that only run at 90 degree angles in an integral grid (only horizontal or vertical) 
+        /// </summary>
+        public static bool TryIntersectLineSegments90(PointF p1, PointF p2, PointF p3, PointF p4, out PointF intersection)
+        {
+            float x1 = Math.Min(p1.X, p2.X);
+            float x2 = Math.Max(p1.X, p2.X);
+            float y1 = Math.Min(p1.Y, p2.Y);
+            float y2 = Math.Max(p1.Y, p2.Y);
+            float x3 = Math.Min(p3.X, p4.X);
+            float x4 = Math.Max(p3.X, p4.X);
+            float y3 = Math.Min(p3.Y, p4.Y);
+            float y4 = Math.Max(p3.Y, p4.Y);
+
+            if (x4 < x1 | x3 > x2 | y4 < y1 | y3 > y2)
+            {
+                intersection = PointF.Zero;
+                return false;
+            }
+            else
+            {
+                if(x1 == x2)
+                {
+                    intersection = new PointF(x1, y3);
+                    return true;
+                }
+                if(y1 == y2)
+                {
+                    intersection = new PointF(x3, y1); 
+                    return true; 
+                }
+
+                throw new Exception("error in intersection..."); 
+            }
+        }
+
+        /// <summary>
         /// get intersection of 2 line sections 
         /// 
         /// p1-p2 / p3-p4
@@ -318,24 +354,7 @@ namespace NSS
                 intersection = PointF.Zero;
                 return false;
             }
-         
-            /*
-            float x1 = Math.Min(p1.X, p2.X);
-            float x2 = Math.Max(p1.X, p2.X);
-            float y1 = Math.Min(p1.Y, p2.Y);
-            float y2 = Math.Max(p1.Y, p2.Y);
-
-            float x3 = Math.Min(p3.X, p4.X);
-            float x4 = Math.Max(p3.X, p4.X);
-            float y3 = Math.Min(p3.Y, p4.Y);
-            float y4 = Math.Max(p3.Y, p4.Y);
-
-            if(x4 < x1 | x1 > x4 | y4 < y1 | y1 > y4)
-            {
-                intersection = PointF.Zero;
-                return false; 
-            } */            
-
+                                    
             float px = -ey;
             float py = ex;
 

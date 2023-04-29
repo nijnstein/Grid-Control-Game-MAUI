@@ -19,8 +19,7 @@ namespace Grid.GameObjects
         /// <summary>
         /// speed of actor in graph units 
         /// </summary>
-        public float Speed = 30f; 
-
+        public float Speed = 30f;
 
         public SizeF Size = new Size(Game.CanvasWidth / GridGame.GridWidth * 2, Game.CanvasHeight / GridGame.GridHeight * 2);
         public bool IsOnSegment => A >= 0 & B >= 0;
