@@ -41,13 +41,25 @@ namespace Grid.GameObjects
 #endif
         }
 
-        public static float Distance(GridPoint a, GridPoint b) => Distance(a, b, GetConnectionType(a, b)); 
-        
+        /// <summary>
+        /// distance on 1 axis directly to neighbour 
+        /// </summary>
+        public static float DistanceToNeighbour(GridPoint a, GridPoint b) => DistanceToNeighbour(a, b, GetConnectionType(a, b));
+
+        /// <summary>
+        /// flight distance 
+        /// </summary>
+        public static float EuclidianDistanceTo(GridPoint a, GridPoint b) => MathF.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+
+        /// <summary>
+        /// manhatten distance 
+        /// </summary>
+        public static float ManhattenDistanceto(GridPoint a, GridPoint b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y); 
 
         /// <summary>
         /// distance to directly connected point 
         /// </summary>
-        public static float Distance(GridPoint a, GridPoint b, Direction connectionType)
+        public static float DistanceToNeighbour(GridPoint a, GridPoint b, Direction connectionType)
         {
             switch(connectionType)
             {

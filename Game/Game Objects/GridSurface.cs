@@ -183,5 +183,30 @@ namespace Grid.GameObjects
                 _pattern = null;
             }
         }
+
+        public void InsertPoint(int pointIndex, int atIndex)
+        {
+            if(this.Points == null)
+            {
+                this.Points = new int[] { pointIndex }; 
+            }
+
+            Span<int> n = new int[Points.Length + 1];
+            Span<int> s = Points.AsSpan(); 
+
+            if (atIndex > 0)
+            {
+                s.Slice(0, atIndex).CopyTo(n);
+                n[atIndex] = pointIndex;
+                s.Slice(atIndex).CopyTo(n.Slice(atIndex + 1));
+            }
+            else
+            {
+                n[0] = pointIndex;
+                s.CopyTo(n.Slice(1)); 
+            }
+
+            Points = n.ToArray();
+        }
     }
 }

@@ -235,6 +235,24 @@ namespace NSS
             int mask = 1 << index;
             a[index] = value ? a[index] | mask : a[index] & ~mask;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MinArg(this Span<float> a)
+        {
+            int imin = -1;
+            float min = float.MaxValue;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i] < min)
+                {
+                    imin = i;
+                    min = a[i];
+                }
+            }
+            return imin; 
+        }
+
     }
 }
  

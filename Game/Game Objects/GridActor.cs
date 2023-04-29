@@ -114,6 +114,54 @@ namespace Grid.GameObjects
             }
         }
 
+        /// <summary>
+        /// move player on an existing segment  
+        /// </summary>
+        protected virtual MoveState MoveOnConnection(Direction moveDirection, float deltaTime)
+        {
+            // move along the segment in direction of input 
+            GridPoint a = Grid.Points[A];
+            GridPoint b = Grid.Points[B];
+            Direction connectionType = GridPoint.GetConnectionType(a, b);
+
+            // check if the movement direction is valid for the given connection 
+            PointF vc = connectionType.ToPointF();
+            PointF vinput = moveDirection.ToPointF();
+
+            if (vc.X != 0 && moveDirection.IsUp())
+            {
+                if (  /* bound check     */ a.Y < 0
+                    //& /* fill check      */ 
+                    //& /* snap2grid check */ 
+                    )
+                {
+                    return MoveState.Blocked;
+                }
+            }
+            else
+            if (vc.X != 0 && moveDirection.IsDown())
+            {
+                if (a.Y > (Grid.SizeY - 1)) return MoveState.Blocked;
+            }
+            else
+            if (vc.Y != 0 && moveDirection.IsLeft())
+            {
+                if (a.X < 0) return MoveState.Blocked;
+            }
+            else
+            if (vc.Y != 0 && moveDirection.IsRight())
+            {
+                if (a.X > (Grid.SizeX - 1)) return MoveState.Blocked;
+            }
+            else
+            {
+                return this.MoveAlongConnection(deltaTime, a, b, connectionType, moveDirection);
+            }
+
+            return MoveState.None;
+        }
+
+
         protected virtual MoveState MoveAlongConnection(float deltaTime, GridPoint a, GridPoint b, Direction connectionDirection, Direction inputDirection)
         {
             // + or - depends on connection type of ABposition and the movement direction 
@@ -127,7 +175,7 @@ namespace Grid.GameObjects
 
             ABPosition += (v * deltaTime);
 
-            float distance = GridPoint.Distance(a, b, connectionDirection);
+            float distance = GridPoint.DistanceToNeighbour(a, b, connectionDirection);
 
             // bound ABPosition by point a and b 
             // - effectively this means that our movement is not 100% smooth as we 'stop' at

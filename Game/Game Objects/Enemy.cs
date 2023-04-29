@@ -49,7 +49,7 @@ namespace Grid.GameObjects
                     B = -1;
                 }
                 else
-                if (ABPosition >= GridPoint.Distance(Grid.Points[A], Grid.Points[B]))
+                if (ABPosition >= GridPoint.DistanceToNeighbour(Grid.Points[A], Grid.Points[B]))
                 {
                     // only if point B is not the last point in the path 
                     // - this happens growing the last path segment on creating a surface 
@@ -67,48 +67,51 @@ namespace Grid.GameObjects
 
         private MoveState MoveTowardsPlayer(float deltaTime)
         {
-            // TODO : calc route to player with a*
-  
             Player player = (Game as GridGame).Player;
             if (player == null) return MoveState.None;
 
-            float x = player.Position.X - Position.X;
-            float y = player.Position.Y - Position.Y;
-
-            Direction dir = Direction.Left;
-
-            if (Math.Abs(x) > Math.Abs(y))
+            int[] path = Grid.SearchPathTo(A, player.A);
+            if (path != null)
             {
-                if (x > 0) dir = Direction.Right;
+                if (path.Length <= 1)
+                {
+
+                }
                 else
-                if (x < 0) dir = Direction.Left;
+                {
+                    GridPoint a = Grid.Points[A];
+                    GridConnection c = Grid.Connections[A];
+                    if (c.GetConnectionType(path[1], out Direction dir))
+                    {
+                        return MoveInDirection(deltaTime, a, c, dir, false);
+                    }
+                }
+                return MoveState.None; 
             }
             else
             {
-                if (y > 0) dir = Direction.Bottom;
-                else
-                if (y < 0) dir = Direction.Top;
-            }
+                Direction dir = (Direction)Random.Shared.Next(4); 
+                GridPoint a = Grid.Points[A];
+                GridConnection c = Grid.Connections[A];
+                MoveState moved = MoveState.None;
 
-            GridPoint a = Grid.Points[A];
-            GridConnection c = Grid.Connections[A];
-            MoveState moved = MoveState.None;
-            
-            // if we cant move freely, force moving into section 
-            for (int i = (int)dir, j = 0, k = 0; k < 2 & moved != MoveState.Moved; k++)
-            {
-                // first try to move in prefered direction
-                moved = MoveInDirection(deltaTime, a, c, dir, k == 1);
-                
-                // then try the others 
-                while (moved != MoveState.Moved & j < 3)
+                // if we cant move freely, force moving into section 
+                for (int i = (int)dir, j = 0, k = 0; k < 2 & moved != MoveState.Moved; k++)
                 {
-                    i = i > 3 ? 0 : i + 1;
-                    j++;
-                    moved = MoveInDirection(deltaTime, a, c, (Direction)i, k == 1);
+                    // first try to move in prefered direction
+                    moved = MoveInDirection(deltaTime, a, c, dir, k == 1);
+
+                    // then try the others 
+                    while (moved != MoveState.Moved & j < 3)
+                    {
+                        i = i > 3 ? 0 : i + 1;
+                        j++;
+                        moved = MoveInDirection(deltaTime, a, c, (Direction)i, k == 1);
+                    }
                 }
+             
+                return moved;
             }
-            return moved;
         }
 
         protected virtual MoveState MoveInDirection(float deltaTime, GridPoint a, GridConnection c, Direction dir, bool forced)
@@ -136,7 +139,7 @@ namespace Grid.GameObjects
         protected virtual MoveState MoveTowards(float deltaTime, GridPoint a, int b, Direction dir)
         {
             B = b;
-            ABPosition = (Speed * deltaTime).Clip(0f, GridPoint.Distance(a, Grid.Points[B], dir));
+            ABPosition = (Speed * deltaTime).Clip(0f, GridPoint.DistanceToNeighbour(a, Grid.Points[B], dir));
             return MoveState.Moved;
         }
 

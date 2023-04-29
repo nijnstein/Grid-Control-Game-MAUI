@@ -236,17 +236,17 @@ namespace Grid.GameObjects
         /// <param name="fx"></param>
         /// <param name="fy"></param>
         /// <param name="count"></param>
-        public void SetConnection(int fx, int fy, int index)
+        public void SetConnection(PointF dir, int index)
         {
-            if (fx == 0)
+            if (dir.X == 0)
             {
-                if (fy < 0) Top = index;
-                if (fy > 0) Bottom = index; 
+                if (dir.Y < 0) Top = index;
+                if (dir.Y > 0) Bottom = index; 
             }
             else
             {
-                if (fx < 0) Left = index;
-                if (fx > 0) Right = index; 
+                if (dir.X < 0) Left = index;
+                if (dir.X > 0) Right = index; 
             }
         }
 
@@ -262,5 +262,14 @@ namespace Grid.GameObjects
                 case Direction.None: Left = Right = Top = Bottom = -1; break;
             }
         }
+
+        public IEnumerable<int> EnumerateNeighbours()
+        {
+            if (Left >= 0) yield return Left;
+            if (Top >= 0) yield return Top;
+            if (Right >= 0) yield return Right;
+            if (Bottom >= 0) yield return Bottom;
+        }
+
     }
 }
