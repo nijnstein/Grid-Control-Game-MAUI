@@ -1,5 +1,4 @@
 ﻿using Microsoft.Maui.Animations;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,9 +7,54 @@ using System.Runtime.CompilerServices;
 
 namespace NSS
 {
- 
     public static class MathEx
     {
+        static public RectF CalculateBoundingRectangle(PointF[] points)
+        {
+            if(points.Length == 0)
+            {
+                return RectF.Zero; 
+            }
+
+            float x1 = points[0].X, y1 = points[0].Y;
+            float x2 = x1;  
+            float y2 = y1;
+
+            for(int i = 1;i < points.Length; i++)
+            {
+                PointF p = points[i];
+                x1 = MathF.Min(x1, p.X);
+                x2 = MathF.Max(x2, p.X);
+                y1 = MathF.Min(y1, p.Y);
+                y2 = MathF.Max(y2, p.Y);
+            }
+
+            return new RectF(x1, y1, x2 - x1, y2 - y1); 
+        }
+
+        public static PointF CalculateCentroid(PointF[] points)
+        {
+            PointF off = points[0];
+            float twicearea = 0;
+            float x = 0;
+            float y = 0;
+            PointF p1, p2;
+            float f;
+            for (int i = 0, j = points.Length - 1; i < points.Length; j = i++)
+            {
+                p1 = points[i];
+                p2 = points[j];
+                f = (p1.X - off.X) * (p2.Y - off.Y) - (p2.X - off.X) * (p1.Y - off.Y);
+                twicearea += f;
+                x += (p1.X + p2.X - 2 * off.X) * f;
+                y += (p1.Y + p2.Y - 2 * off.Y) * f;
+            }
+
+            f = twicearea * 3;
+            return new PointF(x / f + off.X, y / f + off.Y);
+        }
+
+
         static public float CalculateSurfaceArea(PointF[] points)
         {
             if (points == null || points.Length < 3)
@@ -19,9 +63,10 @@ namespace NSS
             }
 
             float area = 0; 
-            for (int i = 0, j = points.Length - 1; i < points.Length; i++)
+            for (int i = 0, j = points.Length - 1; i < points.Length; ++i)
             {
                 area += (points[j].X + points[i].X) * (points[j].Y - points[i].Y);
+                j = i;
             }
             return area * 0.5f;
         }

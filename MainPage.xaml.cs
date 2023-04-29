@@ -69,6 +69,8 @@ namespace Grid
 
         private bool TimerLoop()
         {
+            const int targetFPS = 60; 
+
             // skip the first tick 
             if (lastPhysicsTick == DateTime.MinValue)
             {
@@ -85,22 +87,22 @@ namespace Grid
             try
             {
                 Game.SetInput(InputState); 
-                Game.Update(MathF.Max((float)dt, 1f / 60f));
+                Game.Update(MathF.Max((float)dt, 1f / targetFPS));
             }
             catch
             {
                 // boom
             }
 
-            // update input state at 30 fps
-            if ((now - lastInputTick).TotalSeconds >= 1f / 30f)
+            // update input state at 60 fps
+            if ((now - lastInputTick).TotalSeconds >= 1f / targetFPS)
             {
                 lastInputTick = now;
                 InputState = Input.GetInputState(); 
             }
 
             // update renderer as needed to reach 60fps
-            if ((now - lastRenderTick).TotalSeconds >= 1f / 60f)
+            if ((now - lastRenderTick).TotalSeconds >= 1f / targetFPS)
             {
                 lastRenderTick = now;
 

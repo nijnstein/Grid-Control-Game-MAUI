@@ -35,6 +35,36 @@ namespace Grid.GameObjects
             }
         }
 
+        /// <summary>
+        /// if moving onSegment, check if we reached a point and should toggle into IsOnPoint 
+        /// </summary>
+        protected virtual void CheckSegmentPosition()
+        {
+            // if moving onSegment after updating, check if we hit a point (even if starting from onPoint, speed might be high due to delta)
+            if (IsOnSegment)
+            {
+                if (ABPosition <= 0)
+                {
+                    // on point A 
+                    B = -1;
+                }
+                else
+                if (ABPosition >= GridPoint.Distance(Grid.Points[A], Grid.Points[B]))
+                {
+                    // only if point B is not the last point in the path 
+                    // - this happens growing the last path segment on creating a surface 
+                    if (Grid.CurrentPath.Count == 0 || (B != Grid.CurrentPath[Grid.CurrentPath.Count - 1]))
+                    {
+                        // on point B 
+                        A = B;
+                        B = -1;
+                        ABPosition = 0;
+                    }
+                }
+            }
+        }
+
+
         private MoveState MoveTowardsPlayer(float deltaTime)
         {
             // TODO : calc route to player with a*

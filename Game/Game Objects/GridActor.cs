@@ -59,34 +59,6 @@ namespace Grid.GameObjects
 
         public void SetPosition(int a) => SetPosition(a, -1, 0);
         
-        /// <summary>
-        /// if moving onSegment, check if we reached a point and should toggle into IsOnPoint 
-        /// </summary>
-        protected virtual void CheckSegmentPosition()
-        {
-            // if moving onSegment after updating, check if we hit a point (even if starting from onPoint, speed might be high due to delta)
-            if (IsOnSegment)
-            {
-                if (ABPosition == 0)
-                {
-                    // on point A 
-                    B = -1;
-                }
-                else
-                if (ABPosition >= GridPoint.Distance(Grid.Points[A], Grid.Points[B]))
-                {
-                    // only if point B is not the last point in the path 
-                    // - this happens growing the last path segment on creating a surface 
-                    if (Grid.CurrentPath.Count == 0 || (B != Grid.CurrentPath[Grid.CurrentPath.Count - 1]))
-                    {
-                        // on point B 
-                        A = B;
-                        B = -1;
-                        ABPosition = 0;
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// update canvas position form A, B and the distance travelled between them 
@@ -142,21 +114,37 @@ namespace Grid.GameObjects
             }
         }
 
-        protected virtual MoveState MoveAlongConnection(float deltaTime, GridPoint a, GridPoint b, Direction connectionDirection, Direction input)
+        protected virtual MoveState MoveAlongConnection(float deltaTime, GridPoint a, GridPoint b, Direction connectionDirection, Direction inputDirection)
         {
             // + or - depends on connection type of ABposition and the movement direction 
             float v = connectionDirection == Direction.Left || connectionDirection == Direction.Top
                 ? -Speed
                 : Speed;
 
-            v = input == Direction.Left | input == Direction.Up
+            v = inputDirection == Direction.Left | inputDirection == Direction.Up
                 ? -v
                 : v;
 
             ABPosition += (v * deltaTime);
 
+            float distance = GridPoint.Distance(a, b, connectionDirection);
+
             // bound ABPosition by point a and b 
-            ABPosition = ABPosition.Clip(0f, GridPoint.Distance(a, b, connectionDirection));
+            // - effectively this means that our movement is not 100% smooth as we 'stop' at
+            //   each point
+            if (ABPosition <= 0)
+            {
+                ABPosition = 0;
+                B = -1;
+            }
+            else
+            if (ABPosition >= distance)
+            {
+                ABPosition = 0;
+                A = B;
+                B = -1;
+            }
+
             return MoveState.Moved;
         }
 

@@ -249,5 +249,18 @@ namespace Grid.GameObjects
                 if (fx > 0) Right = index; 
             }
         }
+
+        public void SetConnection(Direction dir, int index)
+        {
+            switch (dir)
+            {
+                case Direction.Left: Left = index; break;
+                case Direction.Right: Right = index; break;
+                case Direction.Top: Top = index; break; 
+                case Direction.Bottom: Bottom = index; break;
+                default:
+                case Direction.None: Left = Right = Top = Bottom = -1; break;
+            }
+        }
     }
 }

@@ -4,8 +4,11 @@ using IImage = Microsoft.Maui.Graphics.IImage;
 namespace NSS.GameObjects
 {
 
+
     public abstract class GameObject : GameObjectMAUIBase 
     {
+        private List<ValueAnimation> _animations = null;
+
         public GameObject Parent { get; set; } = null;
         public List<GameObject> Children { get; set; } = new List<GameObject>();
 
@@ -14,6 +17,17 @@ namespace NSS.GameObjects
 
         public float Rotation { get; set; }
         public float PreviousRotation { get; set; }
+
+        public List<ValueAnimation> Animations 
+        { 
+            get
+            {
+                if (_animations == null) _animations = new List<ValueAnimation>(); 
+                return _animations; 
+            }                       
+        }
+
+        public bool HasAnimations => _animations != null && _animations.Count > 0; 
 
         public PointF Velocity { get; set; } = PointF.Zero;
         public PointF Extent { get; set; } = PointF.Zero;
@@ -111,6 +125,8 @@ namespace NSS.GameObjects
             {
                 PreviousPosition = Position; 
             }
+
+            DoAnimations(deltaTime); 
         }
 
         public virtual void OnCollision(GameObject other, PointF intersection, PointF velocity)
@@ -166,6 +182,17 @@ namespace NSS.GameObjects
                 }
             }
             Update(deltaTime);
+        }
+
+        public virtual void DoAnimations(float deltaTime)
+        {
+            if(HasAnimations)
+            {
+                foreach(ValueAnimation animation in Animations)
+                {
+                    animation.Update(deltaTime); 
+                }
+            }
         }
     }
 }

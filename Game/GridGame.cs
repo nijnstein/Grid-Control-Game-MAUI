@@ -1,6 +1,7 @@
 ﻿using Microsoft.Maui;
 using Microsoft.Maui.Animations;
 using Microsoft.Maui.Graphics;
+using NSS;
 using NSS.GameObjects;
 using System.Net;
 using Font = Microsoft.Maui.Graphics.Font;
@@ -28,17 +29,22 @@ namespace Grid.GameObjects
 
         public int Score;
         public double TotalTime;
-        public double TotalPlayTime; 
+        public double TotalPlayTime;
+
+        public Direction InputDirection;
+        public Direction NextDirection; 
 
         // prevent sticky keys 
-        private float toggleJitter = 0; 
-
+        private float toggleJitter;
+        
                
         public GridGame()
         {
             FillBackground = false; 
             GameState = GameState.Start;
-            ResetIntoPlayState = false; 
+            ResetIntoPlayState = false;
+            InputDirection = Direction.None;
+            NextDirection = Direction.None; 
         }
 
         void Initialize()
@@ -80,17 +86,46 @@ namespace Grid.GameObjects
             Initialize();
         }
 
+        public Direction UpdateDirection(Direction alternate)
+        {
+            InputDirection = alternate;
+            NextDirection = Direction.None;
+            return alternate;
+        }
+
+        public void DoGameOver(int j1 = -1, int j2 = -1)
+        {
+            if (j1 >= 0 && j2 >= 0 && j1 != j2)
+            {
+                // highlight segment intersecting
+                new GridSegment(Game as GridGame, j1, j2);
+            }
+
+            // gameover 
+            Game.GameState = GameState.GameOver;
+
+            //
+            // game over anymations/:    remove grid and drop all surfaces down,   or remove grid and vanish each surface one by one etc.. multple animations that are randomly called
+            // 
+            Game.ShakeFrameCountDown = 30;
+        }
+
 
         public override void Update(float deltaTime)
         {
             base.Update(deltaTime);
 
+            // set input direction
+            InputDirection = InputState.Direction; 
+
+            // update total time 
             TotalTime += deltaTime;
             if (Game.GameState == GameState.Play)
             {
                 TotalPlayTime += deltaTime;
             }
 
+            // handle menu controls 
             if (toggleJitter <= 0 && InputState.Any)
             {
                 toggleJitter = 0.2f; 
@@ -212,7 +247,23 @@ namespace Grid.GameObjects
                 }
 
                 // attenuate the connection point with a filled dot 
+                canvas.FillColor = Colors.White;
                 canvas.FillCircle(p1, DOT_SCALE * gx);
+
+#if DEBUG
+                
+                string s = $"{i} ({connection.Left},{connection.Top},{connection.Right},{connection.Bottom})";
+                SizeF r = canvas.GetStringSize(s, Font.Default, 14);
+
+                RectF rc = new RectF(p1.X, p1.Y, r.Width, r.Height);
+
+                canvas.Font = Font.Default;
+                canvas.FontColor = Colors.White;
+                canvas.FontSize = 12;
+                canvas.FillColor = Colors.Black;
+                canvas.FillRectangle(rc); 
+                canvas.DrawString(s, rc, HorizontalAlignment.Center, VerticalAlignment.Center);
+#endif 
             }
 
         }
