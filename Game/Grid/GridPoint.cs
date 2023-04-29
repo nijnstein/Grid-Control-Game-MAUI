@@ -2,7 +2,7 @@
 
 namespace Grid.GameObjects
 {
-    public struct GridPoint
+     public struct GridPoint
     {
         public int Index; 
         public int X;

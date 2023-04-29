@@ -318,7 +318,23 @@ namespace NSS
                 intersection = PointF.Zero;
                 return false;
             }
+         
+            /*
+            float x1 = Math.Min(p1.X, p2.X);
+            float x2 = Math.Max(p1.X, p2.X);
+            float y1 = Math.Min(p1.Y, p2.Y);
+            float y2 = Math.Max(p1.Y, p2.Y);
 
+            float x3 = Math.Min(p3.X, p4.X);
+            float x4 = Math.Max(p3.X, p4.X);
+            float y3 = Math.Min(p3.Y, p4.Y);
+            float y4 = Math.Max(p3.Y, p4.Y);
+
+            if(x4 < x1 | x1 > x4 | y4 < y1 | y1 > y4)
+            {
+                intersection = PointF.Zero;
+                return false; 
+            } */            
 
             float px = -ey;
             float py = ex;
@@ -328,7 +344,6 @@ namespace NSS
 
             // h == how much to multiply the lenght of the line to touch the other line
             float h = (ax * px + ay * py) / (fx * px + fy * py);
-
 
             // if h < 0 then line p3-p4 is behind p1-p2
             // if h > 1 then its in front
@@ -380,24 +395,6 @@ namespace NSS
             intersection = new PointF(p3.X + fx * h, p3.Y + fy * h);
             return true;
         }
-
-        /*  public static PointF ClosestPointOnLine(PointF p1, PointF p2, PointF test, bool restrictToLineSegment)
-          {
-              PointF ab = new PointF(p2.X - p1.X, p2.Y - p1.Y);
-              PointF ap = new PointF(test.X - p1.X, test.Y - p1.Y);
-
-              float lengthSqrAB = ab.X * ab.X + ab.Y * ab.Y;
-              float t = (ap.X * ab.X + ap.Y * ab.Y) / lengthSqrAB;
-
-              // restrict point to segment by clamping t (the interpolation from p1 to p2
-              if (restrictToLineSegment)
-              {
-                  t = Math.Max(0, Math.Min(1, t)); 
-              }
-
-              // get point on segment 
-              return new PointF(ap.X + t * ab.X, ap.Y + t * ab.Y);
-          }*/
 
         public static PointF ClosestPointOnLine(PointF p1, PointF p2, PointF position, bool restrictToLineSegment = true)
         {

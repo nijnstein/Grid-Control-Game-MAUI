@@ -74,6 +74,9 @@ namespace Grid.GameObjects
                     yIntersect = (int)intersection.Y;
                     return true;
                 }
+
+                p1 = p2;
+                prev = i; 
             }
 
             return false;
@@ -101,9 +104,6 @@ namespace Grid.GameObjects
 #endif 
             PointF a = Points[p1].AsPointF;
             PointF b = Points[p2].AsPointF;
-
-            GridConnection ca = Connections[p1];
-            GridConnection cb = Connections[p2];
 
             // check if the path intersects with the grid 
             int endIndex = Points.Count - CurrentPath.Count + 1;
@@ -709,7 +709,7 @@ namespace Grid.GameObjects
                 int imin = -1;
                 float min = float.MaxValue;
 
-                for (int i = open.Count - 1; i >= 0; i++)
+                for (int i = open.Count - 1; i >= 0; i--)
                 {
                     if (f[open[i]] < min)
                     {
