@@ -60,18 +60,12 @@
 	<ItemGroup>
 	  <MauiImage Remove="Resources\Images\flare.png" />
 	  <MauiImage Remove="Resources\Images\flare_mask.png" />
-	  <MauiImage Remove="Resources\Images\hex_320_480.jpg" />
 	  <MauiImage Remove="Resources\Images\Noise1.jpg" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="Resources\Images\hex_320_480.jpg" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Include="Resources\Images\flare.png" />
 	  <EmbeddedResource Include="Resources\Images\flare_mask.png" />
-	  <EmbeddedResource Include="Resources\Images\hex_320_480.jpg" />
 	  <EmbeddedResource Include="Resources\Images\noise1.jpg" />
 	</ItemGroup>
 

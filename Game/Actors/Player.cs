@@ -141,7 +141,7 @@ namespace Grid.GameObjects
 
                             // create a score popup at the centroid 
                             new PopupScore(
-                                this,
+                                Game,
                                 $"{(int)surface.Score}",
                                 MathF.Min(100, 18 + surface.Surface * 400),
                                 true,
@@ -170,6 +170,8 @@ namespace Grid.GameObjects
                 UpdatePosition();
             }
         }
+
+
 
                
 

@@ -7,6 +7,9 @@ namespace NSS.GameObjects
 
     public abstract class GameObject : GameObjectMAUIBase 
     {
+        public const int DEFAULT_LAYER = 1000;
+        public const int TEXT_LAYER = 100;  
+
         private List<ValueAnimation> _animations = null;
 
         public GameObject Parent { get; set; } = null;
@@ -17,6 +20,11 @@ namespace NSS.GameObjects
 
         public float Rotation { get; set; }
         public float PreviousRotation { get; set; }
+
+        /// <summary>
+        /// zlayer for rendering, 0 is on top, + == further away  
+        /// </summary>
+        public int ZLayer { get; set; } = DEFAULT_LAYER; 
 
         public List<ValueAnimation> Animations 
         { 
@@ -145,7 +153,7 @@ namespace NSS.GameObjects
         public virtual void DoRender(ICanvas canvas, RectF dirtyRect)
         {
             Render(canvas, dirtyRect);
-            foreach (GameObject go in Children)
+            foreach (GameObject go in Children.OrderByDescending(x => x.ZLayer))
             {
                 go.DoRender(canvas, dirtyRect);
             }
@@ -154,7 +162,7 @@ namespace NSS.GameObjects
         public virtual void DoPostRender(ICanvas canvas, RectF dirtyRect)
         {
             PostRender(canvas, dirtyRect);
-            foreach (GameObject go in Children)
+            foreach (GameObject go in Children.OrderByDescending(x => x.ZLayer))
             {
                 go.DoPostRender(canvas, dirtyRect);
             }

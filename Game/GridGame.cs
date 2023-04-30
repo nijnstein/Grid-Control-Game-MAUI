@@ -19,8 +19,8 @@ namespace Grid.GameObjects
         public Player Player;
         public List<GridActor> Enemies;
                                                     
-        public Color GridColor = Colors.LightGray; 
-        public Color GridShadow = Colors.Crimson;
+        public Color GridColor = Colors.Red; 
+        public Color GridShadow = Colors.Gray;
 
         public Color PathColor = Colors.Yellow; 
 
@@ -36,15 +36,30 @@ namespace Grid.GameObjects
 
         // prevent sticky keys 
         private float toggleJitter;
-        
-               
-        public GridGame()
+
+        public Action<GridGame> OnGameOver;
+        public Action<GridGame> OnRunning;
+        public Action<GridGame> OnWin;
+        public Action<GridGame> OnPause;
+        public Action<GridGame> OnStart; 
+
+        public GridGame() : this(null, null, null, null, null) { } 
+
+        public GridGame(Action<GridGame> onStart, Action<GridGame> onPause, Action<GridGame> onRunning, Action<GridGame> onGameOver, Action<GridGame> onWin)
         {
             FillBackground = false; 
             GameState = GameState.Start;
             ResetIntoPlayState = false;
             InputDirection = Direction.None;
-            NextDirection = Direction.None; 
+            NextDirection = Direction.None;
+
+            OnStart = onStart;
+            OnRunning = onRunning;
+            OnPause = onPause;
+            OnGameOver = onGameOver; 
+            OnWin = onWin;
+
+            DoStart();
         }
 
         void Initialize()
@@ -93,6 +108,42 @@ namespace Grid.GameObjects
             return alternate;
         }
 
+        #region Game States 
+
+
+        public void DoStart()
+        {
+            GameState = GameState.Start;
+            if (OnStart != null)
+            {
+                OnStart(this);
+            }
+        }
+        public void DoRunning()
+        {
+            GameState = GameState.Play;
+            if (OnRunning != null)
+            {
+                OnRunning(this);
+            }
+        }
+
+        public void DoPause()
+        {
+            GameState = GameState.Paused;
+            if (OnPause != null)
+            {
+                OnPause(this);
+            }
+        }
+        public void DoWin()
+        {
+            if (OnWin != null)
+            { 
+                OnWin(this);
+            }
+        }
+
         public void DoGameOver(int j1 = -1, int j2 = -1)
         {
             if (j1 >= 0 && j2 >= 0 && j1 != j2)
@@ -108,8 +159,23 @@ namespace Grid.GameObjects
             // game over anymations/:    remove grid and drop all surfaces down,   or remove grid and vanish each surface one by one etc.. multple animations that are randomly called
             // 
             Game.ShakeFrameCountDown = 30;
+
+            if (OnGameOver != null)
+            {
+                OnGameOver(this);
+            }
         }
 
+        #endregion
+
+        #region Game Properties 
+        public float PercentageOfGridControlled => Grid.Surfaces.Sum(x => x.Surface) / 100f;
+
+        public bool CheckWinCondition(float minimum = 70) => PercentageOfGridControlled > minimum;
+
+        #endregion
+
+        #region Render / Update 
 
         public override void Update(float deltaTime)
         {
@@ -125,6 +191,15 @@ namespace Grid.GameObjects
                 TotalPlayTime += deltaTime;
             }
 
+            // check win condition
+            if (Game.GameState == GameState.Play)
+            {
+                if (CheckWinCondition())
+                {
+                    DoWin();
+                }
+            }
+
             // handle menu controls 
             if (toggleJitter <= 0 && InputState.Any)
             {
@@ -136,7 +211,7 @@ namespace Grid.GameObjects
                         {
                             if (InputState.Escape)
                             {
-                                GameState = GameState.Paused;
+                                DoPause(); 
                             }
                             break;
                         }
@@ -147,7 +222,7 @@ namespace Grid.GameObjects
                             if (InputState.SpaceBar)
                             {
                                 Reset();
-                                GameState = GameState.Play; 
+                                DoRunning();
                             }
                             break;
                         }
@@ -156,7 +231,7 @@ namespace Grid.GameObjects
                         {
                             if (InputState.SpaceBar)
                             {
-                                GameState = GameState.Play;
+                                DoRunning(); 
                             }                            
                             break;
                         }
@@ -166,12 +241,12 @@ namespace Grid.GameObjects
                             if (InputState.SpaceBar)
                             {
                                 Reset();
-                                GameState = GameState.Play;
+                                DoRunning(); 
                             }
                             else 
                             if (InputState.Escape)
                             {
-                                GameState = GameState.Play;
+                                DoRunning(); 
                             }
                             break;
                         }
@@ -202,13 +277,7 @@ namespace Grid.GameObjects
             canvas.SetFillPaint(brush, rcView);
             canvas.FillRectangle(rcView);
 
-            // the border
             Color shakeColor = Game.ShakeFrameCountDown % 2 == 1 ? Colors.Red : Colors.WhiteSmoke;
-            canvas.StrokeColor = shakeColor;
-            canvas.StrokeSize = this.ShakeFrameCountDown > 0 ? 9 : 3;
-            canvas.StrokeDashPattern = new float[] { 0.5f };
-
-            canvas.DrawRectangle(rcView);
 
             // the scaling from grid to the internal canvas (which is later transformed to viewspace) 
             float gx = (1f / (float)GridWidth) * CanvasWidth;
@@ -249,28 +318,37 @@ namespace Grid.GameObjects
                 // attenuate the connection point with a filled dot 
                 canvas.FillColor = Colors.White;
                 canvas.FillCircle(p1, DOT_SCALE * gx);
-
-#if DEBUG
-                
-                string s = $"{i} ({connection.Left},{connection.Top},{connection.Right},{connection.Bottom})";
-                SizeF r = canvas.GetStringSize(s, Font.Default, 14);
-
-                RectF rc = new RectF(p1.X, p1.Y, r.Width, r.Height);
-
-                canvas.Font = Font.Default;
-                canvas.FontColor = Colors.White;
-                canvas.FontSize = 12;
-                canvas.FillColor = Colors.Black;
-                canvas.FillRectangle(rc); 
-                canvas.DrawString(s, rc, HorizontalAlignment.Center, VerticalAlignment.Center);
-#endif 
             }
-
         }
 
         public override void PostRender(ICanvas canvas, Rect dirty)
-        { 
-            // this should draw in a seperate layer after all other stuff 
+        {
+#if DEBUG
+            if ((Game.GameState & (GameState.Play | Game.GameState)) != 0)
+            {
+                float gx = (1f / (float)GridWidth) * CanvasWidth;
+                float gy = (1f / (float)GridHeight) * CanvasHeight;
+
+                for (int i = 0; i < Grid.Connections.Count; i++)
+                {
+                    GridConnection connection = Grid.Connections[i];
+                    GridPoint point = Grid.Points[connection.Index];
+                    PointF p1 = PointToView(new PointF(point.X * gx, point.Y * gy));
+
+                    string s = $"{i} ({connection.Left},{connection.Top},{connection.Right},{connection.Bottom})";
+                    SizeF r = canvas.GetStringSize(s, Font.Default, 14);
+
+                    RectF rc = new RectF(p1.X, p1.Y, r.Width, r.Height);
+
+                    canvas.Font = Font.Default;
+                    canvas.FontColor = Colors.White;
+                    canvas.FontSize = 12;
+                    canvas.FillColor = Colors.Black;
+                    canvas.FillRectangle(rc);
+                    canvas.DrawString(s, rc, HorizontalAlignment.Center, VerticalAlignment.Center);
+                }
+            }
+#endif 
 
             // Paused header 
             switch (Game.GameState)
@@ -300,38 +378,9 @@ namespace Grid.GameObjects
                         break; 
                     }
 
-                case GameState.Paused:
+                default: 
                     {
                         DrawBackground(canvas);
-                        PrepareLargeText(canvas);
-
-                        canvas.DrawString("PAUSE", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
-
-                        PrepareSmallText(canvas);
-                        canvas.DrawString("[esc] to continue\n[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
-                        break;
-                    }
-
-                case GameState.GameOver:
-                    {
-                        DrawBackground(canvas);
-                        PrepareLargeText(canvas);
-
-                        canvas.DrawString("GAMEOVER", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
-
-                        PrepareSmallText(canvas);
-                        canvas.DrawString("[space] to restart", 0, ViewportHeight / 4, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
-                        break;
-                    }
-
-                case GameState.Start:
-                    {
-                        PrepareLargeText(canvas);
-
-                        canvas.DrawString("START", 0, 0, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
-
-                        PrepareSmallText(canvas);
-                        canvas.DrawString("[space] to start\n[arrow-keys] to move\n[esc] to pause", 0, ViewportHeight / 2, ViewportWidth, ViewportHeight / 2, HorizontalAlignment.Center, VerticalAlignment.Center);
                         break;
                     }
             }
@@ -352,22 +401,7 @@ namespace Grid.GameObjects
                 canvas.SetFillPaint(brush, rcView);
                 canvas.FillRectangle(rcView); 
             }
-
-            void PrepareLargeText(ICanvas canvas)
-            {
-                canvas.FontColor = Colors.Crimson;
-                canvas.FontSize = ViewportHeight / 10;
-                canvas.SetShadow(new SizeF(6, 6), 4, Colors.DarkRed);
-                canvas.Font = Font.DefaultBold;
-            }
-
-            static void PrepareSmallText(ICanvas canvas)
-            {
-                canvas.FontColor = Colors.White;
-                canvas.FontSize = 30;
-                canvas.SetShadow(new SizeF(1, 1), 1, Colors.Gray);
-                canvas.Font = Font.Default;
-            }
         }
+        #endregion 
     }
 }

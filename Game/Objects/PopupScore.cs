@@ -2,14 +2,17 @@
 
 namespace Grid.GameObjects
 {
-    public class PopupScore : PopupText
+    public class PopupScore : GameText
     {
         private float BaseFontSize;
 
         public PopupScore(GameObject parent, string text, float size, bool bold, RectF region, PointF alignment, Color color) 
-            : base(parent, text, size, bold, region, alignment, color)
+            : base(parent, text, size, bold, region, alignment, color, true, true)
         {
-            BaseFontSize = size; 
+            BaseFontSize = size;
+
+            GradientFillBackground = false;
+            FillColor = Colors.Black;
 
             // popin
             new ValueAnimation(Parent, (float step) =>
@@ -32,10 +35,6 @@ namespace Grid.GameObjects
             });
 
         }
-
-        public override void PostRender(ICanvas canvas, Rect dirtyRect)
-        {
-            base.PostRender(canvas, dirtyRect);
-        }
+    
     }
 }

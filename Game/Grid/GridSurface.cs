@@ -27,6 +27,7 @@ namespace Grid.GameObjects
         public int HighlightCountdown = 20;
         public Color HighlightColor = Colors.Yellow;
         public float HighlightStrokeSize = 3f;
+        public Color GradientColor = Colors.White; 
 
         public PointF Centroid; 
 
@@ -37,7 +38,9 @@ namespace Grid.GameObjects
 
         public bool IsHighlighted => HighlightCountdown > 0;
 
-        
+        public bool PatternFill = false;
+        public bool GradientFill = true;
+
         public GridSurface(GridGame parent, int[] points, bool ccw, [Range(0f, 1f)] float area, float score) : base(parent)
         {
 #if DEBUG
@@ -83,7 +86,7 @@ namespace Grid.GameObjects
             }, 1.5f + Random.Shared.NextSingle() * 2.5f, StepFunction.Linear2Ways, false, true);
         }
 
-        static Color PrimaryColor = Colors.Crimson;
+        static Color PrimaryColor = Color.FromRgba(34, 34, 34, 255);
         static Color[] PrimaryColors = new Color[]
         {
             PrimaryColor,
@@ -91,11 +94,10 @@ namespace Grid.GameObjects
             PrimaryColor.Lerp(Colors.Black, 0.2f),
             PrimaryColor.Lerp(Colors.White, 0.2f), 
             PrimaryColor.Lerp(Colors.Black, 0.1f), 
-            PrimaryColor.Lerp(Colors.Red, 0.1f), 
             PrimaryColor.Lerp(Colors.Black, 0.25f)
         };
 
-        static Color SecondaryColor = Colors.Red;
+        static Color SecondaryColor = Color.FromRgba(54, 54, 54, 255);
         static Color[] SecondaryColors = new Color[]
         {
             SecondaryColor,
@@ -103,7 +105,6 @@ namespace Grid.GameObjects
             SecondaryColor.Lerp(Colors.Black, 0.2f), 
             SecondaryColor.Lerp(Colors.White, 0.2f),
             SecondaryColor.Lerp(Colors.Black, 0.1f),
-            SecondaryColor.Lerp(Colors.Red, 0.1f), 
             SecondaryColor.Lerp(Colors.Black, 0.25f)
         };
 
@@ -146,35 +147,68 @@ namespace Grid.GameObjects
                 _path = ToPathF(Offset, false);
             }
 
-            if (_pattern == null || IsHighlighted)
+            if (PatternFill)
             {
-                Color color = IsHighlighted ? HighlightColor : FillColor;
-                using (PictureCanvas picture = new PictureCanvas(0, 0, _patternSize, _patternSize))
+                if (_pattern == null || IsHighlighted)
                 {
-                    picture.StrokeColor = color;
-                    picture.DrawLine(0, 0, _patternSize, _patternSize);
-                    picture.DrawLine(0, _patternSize, _patternSize, 0);
-                    _pattern = new PicturePattern(picture.Picture, _patternSize, _patternSize);
+                    LinearGradientBrush brush = new LinearGradientBrush()
+                    {
+                        StartPoint = new Point(0, 0),
+                        EndPoint = new Point(1, 1)
+                    };
+                    brush.GradientStops.Add(new GradientStop(FillColor, 0));
+                    brush.GradientStops.Add(new GradientStop(GradientColor, 0.4f));
+                    brush.GradientStops.Add(new GradientStop(FillColor, 1f));
+
+                    float size = 5;
+                    using (PictureCanvas picture = new PictureCanvas(0, 0, size, size))
+                    {
+                        picture.SetFillPaint(brush, Game.ViewRectangle);
+                        picture.FillRectangle(1, 1, size - 1, size - 1);
+                        
+                        _pattern = new PicturePattern(picture.Picture, size, size);
+                    }
                 }
+                canvas.SetFillPattern(_pattern);
+            }
+            else
+            if (GradientFill)
+            {
+                LinearGradientBrush brush = new LinearGradientBrush()
+                {
+                    StartPoint = new Point(0, 0),
+                    EndPoint = new Point(1, 1)
+                };
+                brush.GradientStops.Add(new GradientStop(FillColor, 0));
+                brush.GradientStops.Add(new GradientStop(GradientColor, 0.4f));
+                brush.GradientStops.Add(new GradientStop(FillColor, 1f));
+
+                canvas.SetFillPaint(brush, Game.ViewRectangle);
+            }
+            else
+            {
+                canvas.FillColor = IsHighlighted ? HighlightColor : FillColor;
             }
 
-            canvas.SetFillPattern(_pattern);
             canvas.FillPath(_path, WindingMode.NonZero);
 
-            if (StrokeSize > 0)
+            if (!(PatternFill || GradientFill))
             {
-                if (IsHighlighted)
+                if (StrokeSize > 0)
                 {
-                    canvas.StrokeColor = HighlightCountdown % 2 == 0 ? StrokeColor : HighlightColor;
-                    canvas.StrokeSize = 3;
+                    if (IsHighlighted)
+                    {
+                        canvas.StrokeColor = HighlightCountdown % 2 == 0 ? StrokeColor : HighlightColor;
+                        canvas.StrokeSize = 3;
+                    }
+                    else
+                    {
+                        canvas.StrokeColor = StrokeColor;
+                        canvas.StrokeSize = 1;
+                    }
+                    canvas.StrokeDashPattern = null;
+                    canvas.DrawPath(_path);
                 }
-                else
-                {
-                    canvas.StrokeColor = StrokeColor;
-                    canvas.StrokeSize = 1;
-                }
-                canvas.StrokeDashPattern = null;
-                canvas.DrawPath(_path);
             }
 
             if (IsHighlighted)

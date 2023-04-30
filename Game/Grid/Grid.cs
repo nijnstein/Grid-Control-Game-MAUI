@@ -229,7 +229,6 @@ namespace Grid.GameObjects
                     }
                 }
             }
-
             return p;
         }
 

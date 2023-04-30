@@ -201,7 +201,45 @@ namespace Grid.GameObjects
             {
                 GridPoint A = Grid.Points[a];
                 GridPoint B = Grid.Points[b];
-                Direction dir = GridPoint.GetConnectionType(A, B); 
+                GridConnection aC = Grid.Connections[a];
+                Direction dir = GridPoint.GetConnectionType(A, B);
+
+                if (!aC.ConnectsWith(b))
+                {
+                    // most probably the connection got severed by the player making new segments 
+                    GridConnection bC = Grid.Connections[b];
+
+                    if (aC.TryGetConnected(dir, out int nA)
+                        && 
+                        bC.TryGetConnected(dir.Opposite(), out int nB)
+                        && 
+                        nA == nB)
+                    {
+                        // nA/nB was injected, now check if we are between A and n or n and B 
+                        float d = GridPoint.DistanceToNeighbour(A, Grid.Points[nA]);
+                        if (ABPosition < d)
+                        {
+                            this.A = a;
+                            this.B = nA; 
+                            return MoveState.Moved;
+                        }
+                        else
+                        if (ABPosition > d)
+                        {
+                            this.A = nA;
+                            this.B = b;
+                            return MoveState.Moved;
+                        }
+                        else
+                        {
+                            this.A = nA;
+                            this.B = -1;
+                            this.ABPosition = 0;
+                            return MoveState.Moved; 
+                        }
+                    }
+                }
+
                 return MoveAlongConnection(deltaTime, A, B, dir, dir);
             }
             return MoveState.None; 

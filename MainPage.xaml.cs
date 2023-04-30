@@ -33,11 +33,54 @@ namespace Grid
             Dispatcher.StartTimer(ts, TimerLoop);
             lastRenderTick = DateTime.Now;
 
-            Input = new InputService(); 
-            Game = new GridGame();
+            Input = new InputService();           
+            Game = new GridGame(OnStart, OnPause, OnRunning, OnGameOver, OnWin);
                                     
             view.Drawable = Game;
             Game.Reset((float)view.Width, (float)view.Height);
+            Game.DoStart(); 
+        }
+
+        public void OnStart(GridGame game)
+        {
+            title.IsVisible = true;
+            title.Text = "GRID CONTROL";
+
+            information.IsVisible = true;
+            information.Text = "[space] to start\n[arrow-keys] to move\n[esc] to pause";
+        }
+
+        public void OnRunning(GridGame game)
+        {
+            title.IsVisible = false;
+            information.IsVisible = false;
+        }
+
+        public void OnPause(GridGame game)
+        {
+            title.IsVisible = true;
+            title.Text = "PAUSED";
+
+            information.IsVisible = true; 
+            information.Text = "[esc] to continue\n[space] to restart";
+        }
+
+        public void OnGameOver(GridGame game)
+        {
+            title.IsVisible = true;
+            title.Text = "GAME OVER";
+
+            information.IsVisible = true;
+            information.Text = "[esc] to restart";
+        }
+
+        public void OnWin(GridGame game)
+        {
+            title.IsVisible = true;
+            title.Text = "YOU WON";
+
+            information.IsVisible = true;
+            information.Text = "[esc] to restart";
         }
 
         public void ResetView()

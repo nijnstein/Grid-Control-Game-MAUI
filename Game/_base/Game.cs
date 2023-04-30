@@ -41,6 +41,7 @@ namespace NSS.GameObjects
         {
         }
 
+        public Rect ViewRectangle => new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
 
         public virtual void ResetView(float width, float height)
         {

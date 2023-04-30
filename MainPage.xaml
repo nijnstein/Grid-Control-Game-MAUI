@@ -7,12 +7,42 @@
     <ContentPage.Resources>
         <gameObjects:GridGame x:Key="game" />
     </ContentPage.Resources>
-    
-    
+
+
+    <AbsoluteLayout Margin="0">
+        
         <GraphicsView x:Name="view"  
-                      Drawable="{StaticResource game}"
-                      HorizontalOptions="Fill" 
-                      VerticalOptions="Fill">              
+                      Drawable="{StaticResource game}"                      
+                      AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                      AbsoluteLayout.LayoutFlags="SizeProportional">
+            
+            
         </GraphicsView>
-    
+
+        <Label x:Name="title" 
+               AbsoluteLayout.LayoutBounds="0, 0, 1, 0.5"
+               AbsoluteLayout.LayoutFlags="All" 
+               FontFamily="Arcade"
+               FontSize="100"
+               TextColor="Red"
+               FontAutoScalingEnabled="True"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center">            
+            GRID CONTROL 
+        </Label>
+
+        <Label x:Name="information" 
+               AbsoluteLayout.LayoutBounds="0, 0.5, 1, 1"
+               AbsoluteLayout.LayoutFlags="All" 
+               FontFamily="Arcade"
+               FontSize="40"
+               TextColor="White"
+               FontAutoScalingEnabled="True"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center">
+            text
+        </Label>
+
+    </AbsoluteLayout>
+
 </ContentPage>
