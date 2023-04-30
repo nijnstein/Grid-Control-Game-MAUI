@@ -112,7 +112,7 @@ namespace Grid
 
         private bool TimerLoop()
         {
-            const int targetFPS = 60; 
+            const int targetFPS = 30;
 
             // skip the first tick 
             if (lastPhysicsTick == DateTime.MinValue)
@@ -154,7 +154,16 @@ namespace Grid
 
                 // invalidate frame
                 InvalidateViews();
+
+                // update score 
+                if (Game.GameState == GameState.Play)
+                {
+                    time.Text = $"TIME: {Game.TotalPlayTime.ToString("0")}";
+                    progress.Text = $"{(Game.Score / 100).ToString("0")}%";
+                    score.Text = $"SCORE: {Game.Score.ToString("0")}";
+                }
             }
+
             return true;
         }
     }

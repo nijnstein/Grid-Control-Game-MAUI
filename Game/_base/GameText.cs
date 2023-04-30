@@ -1,4 +1,5 @@
-﻿using NSS.GameObjects;
+﻿using Microsoft.Maui.Controls.Shapes;
+using NSS.GameObjects;
 using Font = Microsoft.Maui.Graphics.Font;
 
 namespace Grid.GameObjects
@@ -75,11 +76,13 @@ namespace Grid.GameObjects
 
                         RectF rc = new RectF(x, y, w, h);
                         canvas.SetFillPaint(brush, rc);
+                        canvas.SetShadow(new SizeF(2, 2), 3, Color.FromRgba(FillColor.Red * .5f, FillColor.Green * .5f, FillColor.Blue * .5f, FillColor.Alpha));
                         canvas.FillRoundedRectangle(rc, min.Height * 0.3f);
                     }
                     else 
                     {
                         canvas.FillColor = FillColor;
+                        canvas.SetShadow(new SizeF(2, 2), 3, Color.FromRgba(FillColor.Red * .5f, FillColor.Green * .5f, FillColor.Blue * .5f, FillColor.Alpha));
                         canvas.FillRoundedRectangle(new RectF(x, y, w, h), min.Height * 0.3f);
                     }
                 }
@@ -87,6 +90,7 @@ namespace Grid.GameObjects
                 canvas.Font = Font;
                 canvas.FontSize = FontSize;
                 canvas.FontColor = FontColor;
+                canvas.SetShadow(new SizeF(1, 1), 3, Color.FromRgba(FontColor.Red * .5f, FontColor.Green * .5f, FontColor.Blue * .5f, FontColor.Alpha));
 
                 canvas.DrawString(
                     Text,

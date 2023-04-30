@@ -270,7 +270,9 @@ namespace Grid.GameObjects
         {
             base.Render(canvas, dirty);
 
-            canvas.FillColor = Color; 
+            canvas.FillColor = Color;
+            canvas.SetShadow(new SizeF(1, 1), 3, Color.FromRgba(Color.Red * .5f, Color.Green * .5f, Color.Blue * .5f, Color.Alpha)); 
+
             canvas.FillCircle(PointToView(Position), 5); 
         }
     }

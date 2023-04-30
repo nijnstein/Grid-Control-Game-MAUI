@@ -14,17 +14,17 @@
         <GraphicsView x:Name="view"  
                       Drawable="{StaticResource game}"                      
                       AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-                      AbsoluteLayout.LayoutFlags="SizeProportional">
-            
+                      AbsoluteLayout.LayoutFlags="SizeProportional">           
             
         </GraphicsView>
 
+        
         <Label x:Name="title" 
                AbsoluteLayout.LayoutBounds="0, 0, 1, 0.5"
                AbsoluteLayout.LayoutFlags="All" 
                FontFamily="Arcade"
                FontSize="100"
-               TextColor="Red"
+               TextColor="Orange"
                FontAutoScalingEnabled="True"
                HorizontalTextAlignment="Center"
                VerticalTextAlignment="Center">            
@@ -42,6 +42,43 @@
                VerticalTextAlignment="Center">
             text
         </Label>
+
+        <Label x:Name="score" 
+               AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+               AbsoluteLayout.LayoutFlags="All" 
+               FontFamily="Arcade"
+               FontSize="26"
+               TextColor="Orange"
+               FontAutoScalingEnabled="True"
+               HorizontalTextAlignment="Start"
+               VerticalTextAlignment="End"
+               Margin="10, 0, 0, 2">
+        </Label>
+
+        <Label x:Name="progress" 
+               AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+               AbsoluteLayout.LayoutFlags="All" 
+               FontFamily="Arcade"
+               FontSize="26"
+               TextColor="Orange"
+               FontAutoScalingEnabled="True"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="End"
+               Margin="0, 0, 0, 2">
+        </Label>
+
+        <Label x:Name="time" 
+               AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+               AbsoluteLayout.LayoutFlags="All" 
+               FontFamily="Arcade"
+               FontSize="26"
+               TextColor="Orange"
+               FontAutoScalingEnabled="True"
+               HorizontalTextAlignment="End"
+               VerticalTextAlignment="End"
+               Margin="0, 0, 10, 2">
+        </Label>
+
 
     </AbsoluteLayout>
 

@@ -19,13 +19,14 @@ namespace Grid.GameObjects
         public Player Player;
         public List<GridActor> Enemies;
                                                     
-        public Color GridColor = Colors.Red; 
+        public Color GridColor = Colors.GhostWhite; 
         public Color GridShadow = Colors.Gray;
 
-        public Color PathColor = Colors.Yellow; 
+        public Color PathColor = Colors.Orange;
+        public Color FontColor = Colors.Orange; 
 
-        public Color BackgroundColor = Color.FromRgb(.07f, .04f, .07f);
-        public Color BackgroundGradientColor = Color.FromRgb(.17f, .14f, .17f);
+        public Color BackgroundColor = Color.FromRgb(.2f, .2f, .2f);
+        public Color BackgroundGradientColor = Color.FromRgb(.3f, .3f, .3f);
 
         public int Score;
         public double TotalTime;
@@ -263,21 +264,22 @@ namespace Grid.GameObjects
             }
 
             // fill background 
-            LinearGradientBrush brush = new LinearGradientBrush()
+            if (FillBackground)
             {
-                StartPoint = new Point(0, 0),
-                EndPoint = new Point(1, 1)
-            };
-            brush.GradientStops.Add(new GradientStop(BackgroundColor, 0));
-            brush.GradientStops.Add(new GradientStop(BackgroundGradientColor, 0.4f));
-            brush.GradientStops.Add(new GradientStop(BackgroundColor, 1f));
+                LinearGradientBrush brush = new LinearGradientBrush()
+                {
+                    StartPoint = new Point(0, 0),
+                    EndPoint = new Point(1, 1)
+                };
+                brush.GradientStops.Add(new GradientStop(BackgroundColor, 0));
+                brush.GradientStops.Add(new GradientStop(BackgroundGradientColor, 0.4f));
+                brush.GradientStops.Add(new GradientStop(BackgroundColor, 1f));
 
-            Rect rcView = new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
-            canvas.FillColor = BackgroundColor;
-            canvas.SetFillPaint(brush, rcView);
-            canvas.FillRectangle(rcView);
-
-            Color shakeColor = Game.ShakeFrameCountDown % 2 == 1 ? Colors.Red : Colors.WhiteSmoke;
+                Rect rcView = new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
+                canvas.FillColor = BackgroundColor;
+                canvas.SetFillPaint(brush, rcView);
+                canvas.FillRectangle(rcView);
+            }
 
             // the scaling from grid to the internal canvas (which is later transformed to viewspace) 
             float gx = (1f / (float)GridWidth) * CanvasWidth;
@@ -290,9 +292,10 @@ namespace Grid.GameObjects
             canvas.StrokeDashPattern = null;
             canvas.FillColor = Colors.White;
             canvas.StrokeSize = 2;
-            canvas.SetShadow(new SizeF(0, 0), 0, GridShadow);
 
             int pathLimit = Grid.CurrentPath.Count == 0 ? Grid.Connections.Count : Grid.Connections.Count - Grid.CurrentPath.Count;
+
+            // connections first 
             for (int i = 0; i < Grid.Connections.Count; i++)
             {
                 GridConnection connection = Grid.Connections[i];
@@ -302,23 +305,33 @@ namespace Grid.GameObjects
                 // draw only connections to the right and bottom preventing overdraw 
                 if (connection.Right >= 0)
                 {
-                    canvas.StrokeColor = (connection.Right >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
+                    Color stroke = (connection.Right >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
+                    canvas.StrokeColor = stroke;
                     GridPoint b = Grid.Points[connection.Right];
                     PointF p2 = new PointF(b.X * gx, b.Y * gy);
+                    canvas.SetShadow(new SizeF(1, 1), 3, Color.FromRgba(stroke.Red * .5f, stroke.Green * .5f, stroke.Blue * .5f, stroke.Alpha));
                     canvas.DrawLine(p1, PointToView(p2));
                 }
                 if (connection.Bottom >= 0)
                 {
-                    canvas.StrokeColor = (connection.Bottom >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
+                    Color stroke = (connection.Bottom >= pathLimit && i >= pathLimit) ? PathColor : GridColor;
+                    canvas.StrokeColor = stroke;
                     GridPoint b = Grid.Points[connection.Bottom];
                     PointF p2 = new PointF(b.X * gx, b.Y * gy);
+                    canvas.SetShadow(new SizeF(1, 1), 3, Color.FromRgba(stroke.Red * .5f, stroke.Green * .5f, stroke.Blue * .5f, stroke.Alpha));
                     canvas.DrawLine(p1, PointToView(p2));
                 }
-
-                // attenuate the connection point with a filled dot 
-                canvas.FillColor = Colors.White;
-                canvas.FillCircle(p1, DOT_SCALE * gx);
             }
+
+            // then all dots 
+            for (int i = 0; i < Grid.Connections.Count; i++)
+            {
+                GridPoint point = Grid.Points[i];
+                canvas.FillColor = Colors.White;
+                canvas.SetShadow(new SizeF(1, 1), 3, Colors.Black);
+                canvas.FillCircle(PointToView(new PointF(point.X * gx, point.Y * gy)), DOT_SCALE * gx);
+            }
+            canvas.SetShadow(new SizeF(0, 0), 0, Colors.Black);
         }
 
         public override void PostRender(ICanvas canvas, Rect dirty)
@@ -350,56 +363,12 @@ namespace Grid.GameObjects
             }
 #endif 
 
-            // Paused header 
-            switch (Game.GameState)
+            // darken background if not playing
+            if (Game.GameState != GameState.Play)
             {
-                case GameState.Play:
-                    {
-                        canvas.FontColor = Colors.Red;
-                        canvas.Font = Font.DefaultBold; 
-                        canvas.FontSize = 20;
-                        canvas.SetShadow(new SizeF(0, 0), 0, Colors.Black);
-
-                        canvas.DrawString($"SCORE: {Score}",
-                            10 + ViewportMarginLeft, 
-                            -10 + ViewportMarginTop + ViewportMarginBottom, 
-                            ViewportWidth - 20, 
-                            ViewportHeight, 
-                            HorizontalAlignment.Right,
-                            VerticalAlignment.Bottom);
-
-                        canvas.DrawString($"TIME: {TotalPlayTime.ToString("0")}",
-                            10 + ViewportMarginLeft, 
-                            -10 + ViewportMarginTop + ViewportMarginBottom, 
-                            ViewportWidth - 20, 
-                            ViewportHeight, 
-                            HorizontalAlignment.Left, 
-                            VerticalAlignment.Bottom);
-                        break; 
-                    }
-
-                default: 
-                    {
-                        DrawBackground(canvas);
-                        break;
-                    }
-            }
-
-            void DrawBackground(ICanvas canvas)
-            {
-                LinearGradientBrush brush = new LinearGradientBrush()
-                {
-                    StartPoint = new Point(0, 0),
-                    EndPoint = new Point(1, 1)
-                };
-                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.1f, .1f, .1f, .6f), 0));
-                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.2f, .2f, .2f, .6f), 0.4f));
-                brush.GradientStops.Add(new GradientStop(Color.FromRgba(.1f, .1f, .1f, .6f), 1f));
-
-                Rect rcView = new Rect(0, 0, ViewportWidth + ViewportMarginLeft + ViewportMarginRight, ViewportHeight + ViewportMarginTop + ViewportMarginBottom);
-
-                canvas.SetFillPaint(brush, rcView);
-                canvas.FillRectangle(rcView); 
+                canvas.FillColor = Color.FromRgba(.1f, .1f, .1f, .6f);
+                canvas.SetShadow(new SizeF(0, 0), 0, Colors.Black);
+                canvas.FillRectangle(Game.ViewRectangle);
             }
         }
         #endregion 

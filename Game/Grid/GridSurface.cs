@@ -24,7 +24,7 @@ namespace Grid.GameObjects
         public Color StrokeColor = Colors.Gray;
         public float StrokeSize = 1f;
 
-        public int HighlightCountdown = 20;
+        public int HighlightCountdown = 0;
         public Color HighlightColor = Colors.Yellow;
         public float HighlightStrokeSize = 3f;
         public Color GradientColor = Colors.White; 
@@ -144,7 +144,7 @@ namespace Grid.GameObjects
             //
             if (_path == null)
             {
-                _path = ToPathF(Offset, false);
+                _path = ToPathF(Offset - 1, false);
             }
 
             if (PatternFill)
@@ -182,12 +182,13 @@ namespace Grid.GameObjects
                 brush.GradientStops.Add(new GradientStop(FillColor, 0));
                 brush.GradientStops.Add(new GradientStop(GradientColor, 0.4f));
                 brush.GradientStops.Add(new GradientStop(FillColor, 1f));
-
                 canvas.SetFillPaint(brush, Game.ViewRectangle);
+                canvas.SetShadow(new SizeF(2, 2), 3, Color.FromRgba(FillColor.Red * .5f, FillColor.Green * .5f, FillColor.Blue * .5f, FillColor.Alpha));
             }
             else
             {
-                canvas.FillColor = IsHighlighted ? HighlightColor : FillColor;
+                canvas.FillColor = FillColor;
+                canvas.SetShadow(new SizeF(2, 2), 3, Color.FromRgba(FillColor.Red * .5f, FillColor.Green * .5f, FillColor.Blue * .5f, FillColor.Alpha));
             }
 
             canvas.FillPath(_path, WindingMode.NonZero);
@@ -196,17 +197,10 @@ namespace Grid.GameObjects
             {
                 if (StrokeSize > 0)
                 {
-                    if (IsHighlighted)
-                    {
-                        canvas.StrokeColor = HighlightCountdown % 2 == 0 ? StrokeColor : HighlightColor;
-                        canvas.StrokeSize = 3;
-                    }
-                    else
-                    {
-                        canvas.StrokeColor = StrokeColor;
-                        canvas.StrokeSize = 1;
-                    }
+                    canvas.StrokeColor = StrokeColor;
+                    canvas.StrokeSize = 1;
                     canvas.StrokeDashPattern = null;
+                    canvas.SetShadow(new SizeF(1, 1), 3, Color.FromRgba(StrokeColor.Red * .5f, StrokeColor.Green * .5f, StrokeColor.Blue * .5f, StrokeColor.Alpha));
                     canvas.DrawPath(_path);
                 }
             }
