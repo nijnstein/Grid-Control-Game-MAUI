@@ -4,4 +4,4 @@ A clone of an old game where you grow regions until a certain portion is owned. 
 
 This version is playable but lacks any progression and is not fully functional yet.
 
- <img width="780" alt="Grid Control 30-4-2023" src="https://user-images.githubusercontent.com/96932314/235331062-c0b14adc-3349-4354-adb5-ae750451236e.PNG">
+ <img width="585" alt="Grid Control 1-5-2023" src="https://user-images.githubusercontent.com/96932314/235380097-59c7a6ce-f471-434b-93f0-cd2763095ab7.PNG">
