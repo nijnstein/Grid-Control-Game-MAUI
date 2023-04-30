@@ -8,7 +8,6 @@
         <gameObjects:GridGame x:Key="game" />
     </ContentPage.Resources>
 
-
     <AbsoluteLayout Margin="0">
         
         <GraphicsView x:Name="view"  

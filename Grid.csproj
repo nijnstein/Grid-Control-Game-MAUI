@@ -64,12 +64,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Raw\Space_Idea.mp3" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <EmbeddedResource Include="Resources\Images\flare.png" />
 	  <EmbeddedResource Include="Resources\Images\flare_mask.png" />
 	  <EmbeddedResource Include="Resources\Images\noise1.jpg" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Plugin.Maui.Audio" Version="1.0.0" />
 	  <PackageReference Include="SkiaSharp" Version="2.88.3" />
 	</ItemGroup>
 

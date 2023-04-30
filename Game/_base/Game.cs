@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Layouts;
+using Plugin.Maui.Audio;
 using System.Numerics;
 
 namespace NSS.GameObjects
@@ -144,7 +145,14 @@ namespace NSS.GameObjects
                 }
             }             
         }
-          
-
+        public async void PlayAudio(string sound, bool loop)
+        {
+            var audioPlayer = AudioManager.Current.CreatePlayer(await FileSystem.OpenAppPackageFileAsync(sound));
+            if (loop)
+            {
+                audioPlayer.Loop = true;
+            }
+            audioPlayer.Play();
+        }
     }
 }

@@ -23,6 +23,9 @@ namespace Grid
         {
             InitializeComponent();
             Initialize();
+
+            Game.PlayAudio("hot-pursuit-loop.mp3", true);
+            //Game.PlayAudio("final-act-loop.mp3", true);
         }
 
         public void Initialize()
