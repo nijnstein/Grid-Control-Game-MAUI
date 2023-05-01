@@ -70,7 +70,6 @@
 	<ItemGroup>
 	  <EmbeddedResource Include="Resources\Images\flare.png" />
 	  <EmbeddedResource Include="Resources\Images\flare_mask.png" />
-	  <EmbeddedResource Include="Resources\Images\noise1.jpg" />
 	</ItemGroup>
 
 	<ItemGroup>

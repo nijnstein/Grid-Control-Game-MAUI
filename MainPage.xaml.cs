@@ -24,8 +24,8 @@ namespace Grid
             InitializeComponent();
             Initialize();
 
-            Game.PlayAudio("hot-pursuit-loop.mp3", true);
-            //Game.PlayAudio("final-act-loop.mp3", true);
+            //Game.PlayAudio("hot-pursuit-loop.mp3", true);
+            Game.PlayAudio("final-act-loop.mp3", true);
         }
 
         public void Initialize()
@@ -115,7 +115,8 @@ namespace Grid
 
         private bool TimerLoop()
         {
-            const int targetFPS = 30;
+            int targetFPS = Game.GameState == GameState.Play ? 30 : 1;
+            int inputFPS = Game.GameState == GameState.Play ? 30 : 15;
 
             // skip the first tick 
             if (lastPhysicsTick == DateTime.MinValue)
@@ -140,14 +141,14 @@ namespace Grid
                 // boom
             }
 
-            // update input state at 60 fps
-            if ((now - lastInputTick).TotalSeconds >= 1f / targetFPS)
+            // update input state  
+            if ((now - lastInputTick).TotalSeconds >= 1f / inputFPS)
             {
                 lastInputTick = now;
                 InputState = Input.GetInputState(); 
             }
 
-            // update renderer as needed to reach 60fps
+            // update renderer as needed to reach target fps
             if ((now - lastRenderTick).TotalSeconds >= 1f / targetFPS)
             {
                 lastRenderTick = now;
